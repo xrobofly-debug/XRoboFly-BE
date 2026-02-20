@@ -48,7 +48,7 @@ const templates = {
         <p>Hi <strong>${name}</strong>,</p>
         <p>Use the OTP below to complete your registration. It expires in <strong>${expiryMinutes} minutes</strong>.</p>
         <div style="text-align:center"><div class="otp">${otp}</div></div>
-        <p style="color:#888;font-size:13px;">If you didn't request this, please ignore this email.</p>`),
+        <p style="color:#888;font-size:13px;">If you did not request this, please ignore this email.</p>`),
 
     welcome: ({ name, email }) => baseLayout(`
         <h2>Welcome to XRoboFly! 🎉</h2>
@@ -68,14 +68,14 @@ const templates = {
           💻 ${deviceInfo || ''} — ${browser || ''} on ${os || ''}<br/>
           🌐 IP: ${ipAddress || 'Unknown'}
         </div>
-        <p>If this wasn't you, please <a href="https://xrobofly.com/signin" style="color:#f97316">change your password immediately</a>.</p>`),
+        <p>If this was not you, please <a href="https://xrobofly.com/signin" style="color:#f97316">change your password immediately</a>.</p>`),
 
     "forgot-password": ({ name, resetLink, expiryMinutes = 30 }) => baseLayout(`
         <h2>Reset Your Password</h2>
         <p>Hi <strong>${name}</strong>,</p>
         <p>Click the button below to reset your password. The link expires in <strong>${expiryMinutes} minutes</strong>.</p>
         <a href="${resetLink}" class="btn">Reset Password</a>
-        <p style="color:#888;font-size:13px;margin-top:16px;">If you didn't request this, you can safely ignore this email.</p>`),
+        <p style="color:#888;font-size:13px;margin-top:16px;">If you did not request this, you can safely ignore this email.</p>`),
 
     "password-reset-success": ({ name }) => baseLayout(`
         <h2>Password Changed Successfully ✅</h2>
@@ -84,17 +84,15 @@ const templates = {
         <a href="https://xrobofly.com/signin" class="btn">Login Now</a>`),
 
     coupon: ({ name, couponCode, discountPercent, expiryDate }) => baseLayout(`
-        <h2>🎁 You've Earned a Coupon!</h2>
+        <h2>🎁 You have Earned a Coupon!</h2>
         <p>Hi <strong>${name}</strong>, thanks for your order!</p>
-        <div style="text-align:center">
-          <div class="otp">${couponCode}</div>
-        </div>
+        <div style="text-align:center"><div class="otp">${couponCode}</div></div>
         <div class="info">
           💰 Discount: <strong>${discountPercent}% OFF</strong><br/>
           📅 Valid until: <strong>${expiryDate}</strong>
         </div>`),
 
-    orderConfirmation: ({ name, orderId, items, totalAmount }) => baseLayout(`
+    orderConfirmation: ({ name, orderId, totalAmount }) => baseLayout(`
         <h2>Order Confirmed! 📦</h2>
         <p>Hi <strong>${name}</strong>, your order has been placed.</p>
         <div class="info">Order ID: <strong>${orderId}</strong></div>
@@ -135,43 +133,3 @@ export const sendMail = async (to, subject, template, context = {}) => {
         throw error;
     }
 };
-
-
-// Email service with proper template usage
-export const sendMail = async (to, subject, template, context = {}) => {
-    // If email is not configured, just log and skip
-    if (!isEmailConfigured || !transporter) {
-        logger.warn(`[DEV MODE] Email sending skipped - Email not configured. Would send to: ${to}, Subject: ${subject}`);
-        return Promise.resolve({ 
-            messageId: 'dev-mode-skip',
-            accepted: [to]
-        });
-    }
-    
-    try {
-        const info = await transporter.sendMail({
-            from: `XRoboFly <${envConfig.GOOGLE_APP_GMAIL}>`,
-            to,
-            subject,
-            template,
-            context
-        });
-        
-        logger.success(`Email sent successfully to ${to} - ${subject}`);
-        return info;
-    } catch (error) {
-        const errMsg = error?.message || String(error) || 'Unknown error';
-        logger.error(`Failed to send email to ${to}:`, errMsg);
-        // Don't throw error in development - just log it
-        if (process.env.NODE_ENV !== 'production') {
-            logger.warn('[DEV MODE] Email sending failed but continuing...');
-            return Promise.resolve({ 
-                messageId: 'dev-mode-error',
-                accepted: [to]
-            });
-        }
-        throw error;
-    }
-};
-
-
