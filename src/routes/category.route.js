@@ -10,7 +10,7 @@ import {
     updateSubcategory,
     deleteSubcategory,
 } from "../controller/category.controller.js";
-import { adminRoute } from "../middleware/auth.middleware.js";
+import { protectRoute, adminRoute } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
@@ -19,14 +19,14 @@ router.get("/", getAllCategories);
 router.get("/:id", getCategory);
 
 // Admin routes
-router.get("/admin/all", adminRoute, getAllCategoriesAdmin);
-router.post("/", adminRoute, createCategory);
-router.put("/:id", adminRoute, updateCategory);
-router.delete("/:id", adminRoute, deleteCategory);
+router.get("/admin/all", protectRoute, adminRoute, getAllCategoriesAdmin);
+router.post("/", protectRoute, adminRoute, createCategory);
+router.put("/:id", protectRoute, adminRoute, updateCategory);
+router.delete("/:id", protectRoute, adminRoute, deleteCategory);
 
 // Subcategory routes
-router.post("/:id/subcategory", adminRoute, addSubcategory);
-router.put("/:categoryId/subcategory/:subcategoryId", adminRoute, updateSubcategory);
-router.delete("/:categoryId/subcategory/:subcategoryId", adminRoute, deleteSubcategory);
+router.post("/:id/subcategory", protectRoute, adminRoute, addSubcategory);
+router.put("/:categoryId/subcategory/:subcategoryId", protectRoute, adminRoute, updateSubcategory);
+router.delete("/:categoryId/subcategory/:subcategoryId", protectRoute, adminRoute, deleteSubcategory);
 
 export default router;
