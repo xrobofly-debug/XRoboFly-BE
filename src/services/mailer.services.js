@@ -6,11 +6,16 @@ const isEmailConfigured = !!(envConfig.GOOGLE_APP_GMAIL && envConfig.GOOGLE_APP_
 
 export const transporter = isEmailConfigured
     ? nodemailer.createTransport({
-        service: "Gmail",
+        host: "smtp.gmail.com",
+        port: 587,
+        secure: false, // STARTTLS
         auth: {
             user: envConfig.GOOGLE_APP_GMAIL,
             pass: envConfig.GOOGLE_APP_PASSWORD,
         },
+        connectionTimeout: 15000,
+        greetingTimeout: 10000,
+        socketTimeout: 20000,
     })
     : null;
 
