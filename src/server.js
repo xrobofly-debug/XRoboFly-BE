@@ -131,6 +131,11 @@ const corsOptions = {
             return callback(null, true);
         }
 
+        // Allow all Vercel preview/deployment URLs for this project
+        if (origin.match(/^https:\/\/x-robo.*\.vercel\.app$/) || origin.endsWith('.vercel.app')) {
+            return callback(null, true);
+        }
+
         // Allow Shiprocket & Cashfree webhook domains
         if (origin.includes('shiprocket') || origin.includes('cashfree')) {
             return callback(null, true);
