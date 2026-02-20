@@ -97,38 +97,52 @@ app.use(cookieParser());
 // }));
 
 // CORS Configuration - Must be before routes
+const getAllowedOrigins = () => {
+    const origins = [
+        // Local development
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://localhost:8080",
+        "http://127.0.0.1:5173",
+        // Production
+        "https://xrobofly.com",
+        "https://www.xrobofly.com",
+    ];
+
+    // Add production frontend URLs from env
+    const frontendUrl = process.env.FRONTEND_URL || process.env.FRONT_END;
+    if (frontendUrl) {
+        frontendUrl.split(',').map(u => u.trim()).forEach(u => {
+            if (u && !origins.includes(u)) origins.push(u);
+        });
+    }
+
+    return origins;
+};
+
 const corsOptions = {
     origin: function (origin, callback) {
-        // Allow requests with no origin (mobile apps, curl, Postman, webhooks)
+        // Allow requests with no origin (Postman, curl, mobile apps, server-to-server)
         if (!origin) return callback(null, true);
-        
-        const allowedOrigins = [
-            "http://localhost:5173",
-            "http://localhost:8080",
-            "http://localhost:8081",
-            "https://red-claw.vercel.app",
-            "https://www.redclaw.in",
-            "http://127.0.0.1:5173"
-        ];
-        
-        // Allow listed origins
-        if (allowedOrigins.indexOf(origin) !== -1) {
+
+        const allowedOrigins = getAllowedOrigins();
+
+        if (allowedOrigins.includes(origin)) {
             return callback(null, true);
         }
-        
-        // Allow Shiprocket domains for webhooks
-        if (origin && origin.includes('shiprocket')) {
+
+        // Allow Shiprocket & Cashfree webhook domains
+        if (origin.includes('shiprocket') || origin.includes('cashfree')) {
             return callback(null, true);
         }
-        
-        // For other origins, still allow (for webhook flexibility)
-        callback(null, true);
+
+        callback(new Error(`CORS blocked: ${origin}`));
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
     exposedHeaders: ['Content-Range', 'X-Content-Range'],
-    maxAge: 86400, // 24 hours
+    maxAge: 86400,
     preflightContinue: false,
     optionsSuccessStatus: 204
 };
